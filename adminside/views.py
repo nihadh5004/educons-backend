@@ -20,7 +20,18 @@ class CourseListView(APIView):
                 {"error": "An error occurred while fetching courses."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
+            
+class ConsultancyCourseList(APIView):
+    def get(self, request,user_id):
+        # try:
+            courses = Course.objects.filter(added_by=user_id)
+            serializer = CourseSerializer(courses, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        # except Exception as e:
+        #     return Response(
+        #         {"error": "An error occurred while fetching courses."},
+        #         status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        #     )
 
 class CourseDetailView(APIView):
     def get (self,request , course_id):
@@ -40,13 +51,17 @@ class FilterlistView(APIView):
             countries = Country.objects.all()
             coursetype = CourseType.objects.all()
             colleges = College.objects.all()
+            consultancies=CustomUser.objects.filter(is_consultancy=True)
+            
             collegeserializer = CollegeSerializer(colleges, many=True)
             countryserializer = CountrySerializer(countries, many=True)
             coursetypeserializer = CourseTypeSerializer(coursetype, many=True)
+            consultancyserializer = ConsultancySerializer(consultancies, many=True)
             response_data = {
                 "collegesData": collegeserializer.data,
                 "countriesData": countryserializer.data,
                 "coursetypeData": coursetypeserializer.data,
+                "ConsultanciesData": consultancyserializer.data ,
             }
             return Response(response_data, status=status.HTTP_200_OK)
         # except Exception as e:
@@ -78,6 +93,29 @@ class BlogDetailView(APIView):
                 {"error": "An error occurred while fetching the blog."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class BlogBlockView(APIView):
+    def post(self, request, blog_id):
+        try:
+            blog = get_object_or_404(Blog, pk=blog_id)
+            # Check the current state of the blog and toggle it
+            blog.is_active = not blog.is_active
+            blog.save()
+            serializer = BlogDetailSerializer(blog)
+            
+            # Determine the response message based on the current state
+            if blog.is_active:
+                message = "Blog unblocked successfully."
+            else:
+                message = "Blog blocked successfully."
+
+            return Response({"message": message, "blog_data": serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while updating the blog state."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+ 
             
 class CommentView(APIView):
     def post(self, request):

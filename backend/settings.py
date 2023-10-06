@@ -127,6 +127,9 @@ DATABASES = {
 }
 
 
+SITE_URL ='http://127.0.0.1:5173/login'
+
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

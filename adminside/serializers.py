@@ -1,5 +1,12 @@
 from rest_framework import serializers
 from .models import *
+from authentication.models import CustomUser
+
+
+class ConsultancySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'username','phone')
 
 class CountrySerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,10 +31,10 @@ class CollegeSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     college = CollegeSerializer()  # Serialize the Country model
     course_type = CourseTypeSerializer()  # Serialize the CourseType model
-
+    added_by=ConsultancySerializer()
     class Meta:
         model = Course
-        fields = ['id', 'name', 'college',  'course_type', 'description', 'duration', 'is_active', 'image']
+        fields = ['id', 'name', 'college',  'course_type', 'description', 'duration', 'is_active', 'image', 'added_by']
 
 class TruncatedContentField(serializers.CharField):
     def __init__(self, *args, **kwargs):
@@ -45,14 +52,14 @@ class BlogSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='user.username') 
     class Meta:
         model = Blog
-        fields = ('id', 'username', 'heading', 'image', 'truncated_content', 'created_date')
+        fields = ('id', 'username', 'heading', 'image', 'truncated_content', 'created_date', 'is_active')
         
         
 class BlogDetailSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='user.username') 
     class Meta:
         model = Blog
-        fields = ('id', 'username', 'heading', 'image', 'content', 'created_date')
+        fields = ('id', 'username', 'heading', 'image', 'content', 'created_date','is_active')
         
         
 

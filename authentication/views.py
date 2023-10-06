@@ -1,4 +1,5 @@
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render,redirect
 from django.views import View
 from authentication.models import CustomUser  # Adjust the import path as needed
 from rest_framework import status
@@ -14,7 +15,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode 
 from django.utils.encoding import force_bytes , force_str
-
+from django.conf import settings
 # importing the token geneater which creates a unique hash value for user
 from .token import generate_token
 
@@ -38,6 +39,7 @@ class Signup(APIView):
                username = request.data.get('username')
                email = request.data.get('email')
                password = request.data.get('password')
+               is_consultancy = request.data.get('is_consultancy')
 
                
 
@@ -47,19 +49,37 @@ class Signup(APIView):
 
                # Create a new user object
                myuser=CustomUser.objects.create_user(username=username, password=password, email=email)
+               if is_consultancy:
+                    myuser.is_consultancy=True
                myuser.is_active = False
                myuser.save()
-               generated_otp=random.randint(100000,999999)
-               generated_otp_test = request.session.get('otp')
-               request.session['otp']=str(generated_otp)
-               
+               # generated_otp=random.randint(100000,999999)
+               # generated_otp_test = request.session.get('otp')
+               # request.session['otp']=str(generated_otp)
+               # print('hello')
                # sending OTP through mail
-               subject = 'EduCons Confirmation OTP'
-               message = f'Hello {myuser.username},\nWe are happy to serve you\n \nPlease Verify your account by OTP: {generated_otp}'
-               from_email=settings.EMAIL_HOST_USER
-               to_list=[myuser.email]
+               # subject = 'EduCons Confirmation OTP'
+               # message = f'Hello {myuser.username},\nWe are happy to serve you\n \nPlease Verify your account by OTP: {generated_otp}'
+               # from_email=settings.EMAIL_HOST_USER
+               # to_list=[myuser.email]
                
-               send_mail(subject,message,from_email,to_list,fail_silently=True)
+               # send_mail(subject,message,from_email,to_list,fail_silently=True)
+               #email confirmation for the user
+               current_site = get_current_site(request)
+               email_subject = 'confirm Your email @ EduCons'
+               message2 = render_to_string('activation_mail.html',{
+                    'name': myuser.username ,
+                    'domain': current_site.domain ,
+                    'uid': urlsafe_base64_encode(force_bytes(myuser.pk)),
+                    'token': generate_token.make_token(myuser),
+               })
+               email = EmailMessage(
+                    email_subject,message2,
+                    settings.EMAIL_HOST_USER,
+                    [myuser.email] 
+               )
+               email.fail_silently = True
+               email.send()
 
                return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
           except Exception as e:
@@ -102,7 +122,31 @@ class Activate(APIView):
                
 
 
-    
+
+def activate(request,uidb64,token):
+     try:
+        uid=force_str(urlsafe_base64_decode(uidb64))
+        myuser=CustomUser.objects.get(pk=uid)
+     except(TypeError,ValueError,OverflowError, User.DoesNotExist):
+        myuser=None
+    # checking the user and token doesnt has a conflict  
+     if myuser is not None and generate_token.check_token(myuser,token):
+        
+        myuser.is_active=True
+        myuser.save()
+        session=settings.SITE_URL
+     #    return render(request,'verification_success.html')
+        return HttpResponseRedirect(settings.SITE_URL)        
+     else:
+        # Delete the user if activation fails and the activation link is expired
+        user_creation_time = myuser.date_joined
+        # Define the expiration time (24 hours after user creation)
+        expiration_time = user_creation_time + timedelta(hours=24)  
+
+        if myuser is not None and myuser.is_active == False and timezone.now() > expiration_time:
+            myuser.delete()
+
+        return render(request, 'verification_failed.html')    
 
 class Signout(APIView):
      # permission_classes = (IsAuthenticated, )

@@ -11,7 +11,7 @@ from authentication.serializers import CustomUserSerializer
 
 
 class Profile(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
@@ -29,3 +29,20 @@ class Profile(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"detail": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class FileUploadView(APIView):
+    def post(self, request, *args, **kwargs):
+        uploaded_file = request.FILES.get('file')
+        username = request.data.get('username')
+
+        try:
+            user = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if uploaded_file:
+            user.image = uploaded_file
+            user.save()
+            return Response({'message': 'File uploaded successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)

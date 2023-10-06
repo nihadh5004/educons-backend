@@ -38,7 +38,8 @@ class Course(models.Model):
     duration = models.PositiveIntegerField(help_text="Duration in Years")
     description = models.TextField()
     is_active = models.BooleanField(default=True)
-    
+    added_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+
     
     def __str__(self):
         return self.name
@@ -50,7 +51,8 @@ class Blog(models.Model):
     content = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(CustomUser, related_name='liked_blogs', blank=True)
-
+    is_active = models.BooleanField(default=True)
+    
     def __str__(self):
         return self.heading
     
@@ -80,3 +82,15 @@ class SavedBlog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} saved '{self.blog.heading}' "
+    
+    
+
+class Student(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    college = models.ForeignKey(College, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    # Add any additional fields related to students here
+    # For example, you can add a field for student ID or GPA
+
+    def __str__(self):
+        return self.user.username  

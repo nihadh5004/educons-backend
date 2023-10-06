@@ -112,8 +112,9 @@ class CourseCreateView(APIView):
         print('hello')
         name = request.data.get('name')
         college_id = request.data.get('college')
-        
-        print(college_id)
+        user_id = request.data.get('user_id')
+        user=CustomUser.objects.get(id=user_id)
+        print(user_id)
         course_type_id = request.data.get('course_type')
         print(course_type_id)
         image = request.data.get('image')
@@ -132,7 +133,8 @@ class CourseCreateView(APIView):
             image=image,
             duration=duration,
             description=description,
-            is_active=is_active
+            is_active=is_active,
+            added_by = user
         )
 
         # Save the object to the database
