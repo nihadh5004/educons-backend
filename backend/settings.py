@@ -40,6 +40,8 @@ ALLOWED_HOSTS = ['localhost' , 'localhost:5173' ,'127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,11 +56,15 @@ INSTALLED_APPS = [
     'profileapp',
     'adminside',
     'userside',
+    'consultantside',
+    'chat',
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',  # Add your frontend URL here
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+    # Add your frontend URL here
     # Additional allowed origins if needed
 ]
 
@@ -72,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'channels.middleware.WebSocketMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -106,10 +113,17 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'backend.wsgi.application'
 WSGI_APPLICATION = 'backend.wsgi.application'
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 # SESSION_COOKIE_AGE = 3600  # 1 hour in seconds
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
 
 
 # Database

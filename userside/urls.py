@@ -9,6 +9,10 @@ urlpatterns = [
     path('deletecountry/<int:country_id>/', CountryDeleteView.as_view(), name='country-delete'),
     path('add_course/', CourseCreateView.as_view(), name='create-course'),
     path('deletecourse/<int:course_id>/', CourseDeleteView.as_view(), name='course-delete'),
+    path('submit-request/', SubmitConsultantRequest.as_view(), name='submit-consultant-request'),
+    path('get-consultant-request/', ConsultantRequestList.as_view(), name='get-consultant-request'),
+    path('approve-consultant-request/<int:request_id>/', ApproveConsultantRequest.as_view(), name='approve-consultant-request'),
+    path('block-course/', CourseBlockView.as_view(), name='block-course'),
 
 
 

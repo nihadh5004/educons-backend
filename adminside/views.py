@@ -379,3 +379,38 @@ class UpdateProfileView(APIView):
 
         except CustomUser.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+ 
+from userside.models import UserRequest
+       
+class CreateUserRequest(APIView):
+    def post(self, request, format=None):
+        # Get user ID and course ID from the request data
+        user_id = request.data.get('user')
+        course_id = request.data.get('course')
+
+        try:
+            # Check if the UserRequest already exists for the given user and course
+            existing_request = UserRequest.objects.filter(user_id=user_id, course_id=course_id).first()
+
+            if existing_request:
+                return Response({'detail': 'UserRequest already exists for this user and course.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a new UserRequest
+            user_request = UserRequest.objects.create(user_id=user_id, course_id=course_id)
+            user_request.save()
+
+            return Response({'detail': 'UserRequest created successfully.'}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class StudentsList(APIView):
+    def get(self,request):
+        students = CustomUser.objects.filter(is_student=True)
+        
+        serializer = CustomUserSerializer(students, many=True)
+        print('yes')
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

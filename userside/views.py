@@ -153,3 +153,94 @@ class CourseDeleteView(APIView):
             return Response({'message': 'Course deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Course.DoesNotExist:
             return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+from .models import *
+
+
+class SubmitConsultantRequest(APIView):
+    def post(self, request):
+        # Retrieve data from the request
+        consultant_id = request.data.get('userId')
+        course_id = request.data.get('courseId')
+        intake_year = request.data.get('intakeYear')
+        intake_month = request.data.get('intakeMonth')
+        username = request.data.get('username')
+        
+        user=CustomUser.objects.get(username=username)
+        user_id=user.id
+        try:
+            # Create a new ConsultantRequest object
+            consultant_request = ConsultantRequest.objects.create(
+                user_id=user_id,
+                course_id=course_id,
+                intake_year=intake_year,
+                intake_month=intake_month,
+                consultant_id=consultant_id
+            )
+
+            # You can perform any additional actions here if needed
+
+            # Return a success response
+            return Response({'message': 'Consultant request submitted successfully.'}, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            # Return an error response if there's an exception
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+from consultantside.serializers import ConsultantRequestSerializer  
+        
+class ConsultantRequestList(APIView):
+    def get(self,request):
+        requests=ConsultantRequest.objects.all()
+        serializer = ConsultantRequestSerializer(requests, many=True)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+class ApproveConsultantRequest(APIView):
+    def post(self, request, request_id):
+        try:
+            # Retrieve the consultant request by ID
+            consultant_request = ConsultantRequest.objects.get(pk=request_id)
+            user_id=consultant_request.user.id
+            user=CustomUser.objects.get(pk=user_id)
+            user.is_student=True
+            user.save()
+            # Approve the request by setting is_approved to True
+            consultant_request.is_approved = True
+            consultant_request.save()
+
+            # You can perform any additional actions here if needed
+
+            # Return a success response
+            return Response({'message': 'Consultant request approved successfully.'}, status=status.HTTP_200_OK)
+        except ConsultantRequest.DoesNotExist:
+            # Return a not found response if the request ID is invalid
+            return Response({'error': 'Consultant request not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            # Return an error response if there's an exception
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        
+class CourseBlockView(APIView):
+    def post(self, request):
+        course_id = request.data.get('courseId')
+        try:
+            # Retrieve the course by ID
+            course = Course.objects.get(pk=course_id)
+            
+            # Toggle the is_active status (block if unblocked, unblock if blocked)
+            course.is_active = not course.is_active
+            course.save()
+            
+            # Return a success response with the updated is_active status
+            response_data = {
+                'message': 'Course status updated successfully.',
+                'is_active': course.is_active,
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Course.DoesNotExist:
+            # Return a not found response if the course ID is invalid
+            return Response({'error': 'Course not found.'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            # Return an error response if there's an exception
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

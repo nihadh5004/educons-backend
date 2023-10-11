@@ -14,5 +14,7 @@ urlpatterns = [
     path('checksave/', CheckSaveView.as_view(), name='check_save_view'),
     path('submit-blog/', BlogCreateView.as_view(), name='submit-blog'),
     path('update-profile/<int:profile_id>/', UpdateProfileView.as_view(), name='update-profile'),
+    path('create-user-request/', CreateUserRequest.as_view(), name='create-user-request'),
+    path('student-chat-list/', StudentsList.as_view(), name='student-chat-list'),
 
 ]

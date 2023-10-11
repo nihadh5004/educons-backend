@@ -19,6 +19,8 @@ urlpatterns = [
     path('',include('profileapp.urls')),
     path('',include('adminside.urls')),
     path('',include('userside.urls')),
+    path('',include('consultantside.urls')),
+    path('',include('chat.urls')),
 ]
 
 if settings.DEBUG:
