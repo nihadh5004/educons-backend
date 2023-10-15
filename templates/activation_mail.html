@@ -4,7 +4,7 @@ Hello   {{name}}
 
 Please confirm your email by clicking following link!!
 
-Confirmation Link : http://127.0.0.1:8000/{% url 'activate' uidb64=uid  token=token %}
+Confirmation Link : http://127.0.0.1:8000{% url 'activate' uidb64=uid  token=token %}
 
 
 {% endautoescape %}

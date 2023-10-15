@@ -65,6 +65,17 @@ class BlogComment(models.Model):
     def __str__(self):
         return f"Comment by {self.user.username} on '{self.blog.heading}'"
     
+    
+   
+class CommentReply(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # User who made the comment
+    comment = models.ForeignKey(BlogComment, on_delete=models.CASCADE)  # Blog that the comment belongs to
+    reply = models.TextField()
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on '{self.comment.comment}'"
+    
 class BlogLike(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)  # User who liked the blog
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE)  # Blog that was liked

@@ -9,6 +9,7 @@ urlpatterns = [
     path('block-blog/<int:blog_id>/', BlogBlockView.as_view(), name='block-blog'),
     path('course-details/<int:course_id>/', CourseDetailView.as_view(), name='course-detail'),
     path('postcomment/' , CommentView.as_view(), name='post-comment'),
+    path('reply/' , CommentReplyCreate.as_view(), name='reply'),
     path('bloglikes/' , BlogLikeView.as_view(), name='post-comment'),
     path('blogsave/' , SaveBlogView.as_view(), name='post-comment'),
     path('checksave/', CheckSaveView.as_view(), name='check_save_view'),

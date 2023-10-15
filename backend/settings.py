@@ -25,6 +25,7 @@ EMAIL_PORT = EMAIL_PORT
 EMAIL_HOST_USER = EMAIL_HOST_USER
 EMAIL_HOST_PASSWORD = EMAIL_HOST_PASSWORD
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     'userside',
     'consultantside',
     'chat',
+    'payments',
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
@@ -113,7 +115,7 @@ TEMPLATES = [
     },
 ]
 
-ASGI_APPLICATION = 'backend.wsgi.application'
+ASGI_APPLICATION = 'backend.asgi.application'
 WSGI_APPLICATION = 'backend.wsgi.application'
 # SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 # SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
@@ -141,9 +143,11 @@ DATABASES = {
 }
 
 
-SITE_URL ='http://127.0.0.1:5173/login'
+SITE_URL ='http://127.0.0.1:5173'
 
 
+
+STRIPE_SECRET_KEY = 'sk_test_51O0IwOSGKyiP0qJkBa9xgnT3lBAuVIrZaDMkDEEtfTdVB9enIfHrdmMu5CQ8un5HqaOeWmZqe5dY4hnaXM3DyyRA00thfnXlo0'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

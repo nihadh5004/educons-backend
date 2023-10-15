@@ -10,6 +10,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['is_superuser'] = user.is_superuser
         data['is_student'] = user.is_student
         data['is_consultancy'] = user.is_consultancy
+        data['is_premium'] = user.is_premium
         data['id']=user.id
         return data
 

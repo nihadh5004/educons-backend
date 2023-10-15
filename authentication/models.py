@@ -7,3 +7,4 @@ class CustomUser(AbstractUser):
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
     is_student =models.BooleanField(default=False)
     is_consultancy =models.BooleanField(default=False)
+    is_premium = models.BooleanField(default=False)

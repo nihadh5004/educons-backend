@@ -21,6 +21,7 @@ urlpatterns = [
     path('',include('userside.urls')),
     path('',include('consultantside.urls')),
     path('',include('chat.urls')),
+    path('api/stripe/', include('payments.urls')),
 ]
 
 if settings.DEBUG:

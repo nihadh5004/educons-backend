@@ -154,6 +154,8 @@ class CommentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
             
+
+            
     def get(self, request):
         blog_id = request.query_params.get('blogId')  # Retrieve blogId from query parameters
         try:
@@ -183,7 +185,62 @@ class CommentView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class CommentReplyCreate(APIView):
+    def post(self, request):
+        comment_id = request.data.get('commentId')
+        user_id = request.data.get('userId')
+        reply_text = request.data.get('text')
 
+        try:
+            user = CustomUser.objects.get(id=user_id)
+            comment =BlogComment.objects.get(id=comment_id)
+
+            comment_reply = CommentReply.objects.create(user=user, comment=comment, reply=reply_text)
+
+            # Serialize the newly created comment
+            serializer = CommentReplySerializer(comment_reply)
+
+            # # Include 'user_id' and 'username' in the response data
+            response_data = {
+                **serializer.data,
+                "username": user.username,
+            }
+            return Response(response_data,status=status.HTTP_201_CREATED)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"error": "User not found."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while posting comment."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def get(self, request):
+        comment_id = request.query_params.get('commentId')  # Retrieve blogId from query parameters
+        try:
+            comment = BlogComment.objects.get(pk=comment_id)
+            replies = CommentReply.objects.filter(comment=comment)
+            reply_data = []
+
+            for reply in replies:
+                reply_data.append({
+                    'id': reply.id,
+                    'user': reply.user.id,
+                    'username': reply.user.username,
+                    'reply': reply.reply,
+                    'comment' : reply.comment.id,
+                    'created_date': reply.created_date
+                })
+
+            return Response(reply_data, status=status.HTTP_200_OK)
+       
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while fetching comments."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 

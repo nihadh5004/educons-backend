@@ -86,13 +86,7 @@ class Signup(APIView):
                # Handle exceptions here and return an appropriate error response
                return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-     # def get(self, request):
-     #    otp=request.session.get('otp')
-     #    print('otp',otp)
-     #    users = CustomUser.objects.all()  # Retrieve all users
-     #    user_serializer = CustomUserSerializer(users, many=True)  # Serialize the queryset
-     #    return Response(user_serializer.data)  # Return serialized data
-
+     
 
 class Activate(APIView):
      
@@ -134,9 +128,9 @@ def activate(request,uidb64,token):
         
         myuser.is_active=True
         myuser.save()
-        session=settings.SITE_URL
+        session=settings.SITE_URL + '/login'
      #    return render(request,'verification_success.html')
-        return HttpResponseRedirect(settings.SITE_URL)        
+        return HttpResponseRedirect(session)        
      else:
         # Delete the user if activation fails and the activation link is expired
         user_creation_time = myuser.date_joined
