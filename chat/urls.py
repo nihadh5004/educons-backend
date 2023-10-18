@@ -8,5 +8,6 @@ urlpatterns = [
     path('chat/messages/<int:user_id>/<int:student_id>/', views.UserDoctorChatView.as_view(), name='user-doctor-chat'),
     path('chat/create/',views.MessageCreateView.as_view(),name='message-create'),
     path('users-chatted-with/<int:user_id>/', views.UsersChattedWithView.as_view(), name='users-chatted-with'),
+    path('online-status/<int:user_id>/', views.FetchOnlineView.as_view(), name='online-status'),
 
 ]

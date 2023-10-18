@@ -1,6 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.mail import send_mail , EmailMessage
+from backend import settings
+
 from authentication.models import *
 from adminside.models import *
 from .serializers import *
@@ -27,6 +30,14 @@ class BlockUserView(APIView):
             user.is_active = False
             user.save()
             
+            if user.is_consultancy:
+                    subject = 'Account deactivated'
+                    message = f'Hello {user.username},\nYour account has been de-activated,\n Now you cannot login with your username and password.'
+                    from_email = settings.EMAIL_HOST_USER
+                    to_list = [user.email]
+                    send_mail(subject, message, from_email, to_list, fail_silently=True)
+
+            
             return Response({'message': 'User blocked successfully'}, status=status.HTTP_200_OK)
         except CustomUser.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -45,6 +56,13 @@ class UnblockUserView(APIView):
                 # Unblock the user
                 user.is_active = True
                 user.save()
+                # If you want to send an email when unblocking the user, uncomment the following code:
+                if user.is_consultancy:
+                    subject = 'Account activated'
+                    message = f'Hello {user.username},\nYour account has been activated,\n Now you can login with your username and password.'
+                    from_email = settings.EMAIL_HOST_USER
+                    to_list = [user.email]
+                    send_mail(subject, message, from_email, to_list, fail_silently=True)
 
                 # Return a success response
                 return Response({"message": "User unblocked successfully"}, status=status.HTTP_200_OK)
@@ -244,3 +262,33 @@ class CourseBlockView(APIView):
         except Exception as e:
             # Return an error response if there's an exception
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
+class FetchAdminDetails(APIView):
+    def get(self,request):
+        # try:
+            students=CustomUser.objects.filter(is_student=True).count()
+            courses=Course.objects.all().count()
+            users=CustomUser.objects.filter(is_consultancy=False,is_superuser=False).count()
+            requests=ConsultantRequest.objects.filter(is_approved = False).count()
+            userlist=CustomUser.objects.filter(is_consultancy=False,is_superuser=False).order_by('-id')[:3]
+            
+            serializer = UserListSerializer(userlist, many=True)
+            data = {
+                "students": students,
+                "pendings": requests,
+                "users": users,
+                "courses": courses,
+                "userlist": serializer.data  # Add serialized userlist to the response
+            }
+
+                # Return the data in the response
+            return Response(data, status=status.HTTP_200_OK)
+
+        # except CustomUser.DoesNotExist:
+        #     # Handle the case where the consultant is not found
+        #     return Response({"error": "Consultant not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # except Exception as e:
+        #     # Handle other exceptions
+        #     return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

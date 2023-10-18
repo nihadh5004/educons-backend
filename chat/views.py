@@ -10,7 +10,37 @@ from .serializers import MessageSerializer
 from authentication.models import CustomUser
 from authentication.serializers import CustomUserSerializer 
 from .models import Message
+from rest_framework_simplejwt.tokens import AccessToken
+from channels.db import database_sync_to_async
+
 # Create your views here.
+
+def get_user_from_token(token_key):
+    tok=token_key[6:]
+    print(tok)
+    try:
+        print('yes')
+        decoded_token = AccessToken(tok)
+        user_id = decoded_token['user_id']
+        print(user_id)
+
+        return user_id
+    except :
+        return None
+
+@database_sync_to_async
+def update_online_status(status, user):
+    try:    
+        print(user)
+        print('yyyy')
+        user_obj=CustomUser.objects.get(id=user)
+        print('yyyy11')
+        user_obj.online = status
+        user_obj.save()
+    except:
+        pass
+    
+
 class MessageCreateView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = MessageSerializer(data=request.data)
@@ -69,3 +99,11 @@ class UsersChattedWithView(APIView):
         serializer = CustomUserSerializer(users, many=True)
 
         return Response(serializer.data, status=200)
+    
+class FetchOnlineView(APIView):
+    def get(self,request,user_id):
+        print(user_id)
+        user=CustomUser.objects.get(id=user_id)
+        online=user.online
+        
+        return Response(online,status=200)

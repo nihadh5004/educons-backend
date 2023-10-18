@@ -83,3 +83,37 @@ class EditCourse(APIView):
         #         {'error': str(e)},
         #         status=status.HTTP_500_INTERNAL_SERVER_ERROR
         #     )
+        
+        
+        
+class FetchConsultantDetails(APIView):
+     def get(self, request, consultant_id):
+        try:
+            # Get the consultant object or return a 404 if not found
+            consultant = get_object_or_404(CustomUser, pk=consultant_id)
+
+            # Count the number of students, requests, pending requests, and courses
+            students = ConsultantRequest.objects.filter(consultant_id=consultant, is_approved=True).count()
+            requests = UserRequest.objects.filter(course__added_by=consultant).count()
+            pending = ConsultantRequest.objects.filter(consultant_id=consultant, is_approved=False).count()
+            courses = Course.objects.filter(added_by=consultant).count()
+
+            # Create a dictionary to store the data
+            data = {
+                "students": students,
+                "requests": requests,
+                "pending": pending,
+                "courses": courses,
+            }
+
+            # Return the data in the response
+            return Response(data, status=status.HTTP_200_OK)
+
+        except CustomUser.DoesNotExist:
+            # Handle the case where the consultant is not found
+            return Response({"error": "Consultant not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            # Handle other exceptions
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        

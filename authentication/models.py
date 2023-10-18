@@ -8,3 +8,4 @@ class CustomUser(AbstractUser):
     is_student =models.BooleanField(default=False)
     is_consultancy =models.BooleanField(default=False)
     is_premium = models.BooleanField(default=False)
+    online= models.BooleanField(default=False)

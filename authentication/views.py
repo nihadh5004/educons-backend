@@ -53,6 +53,8 @@ class Signup(APIView):
                     myuser.is_consultancy=True
                myuser.is_active = False
                myuser.save()
+               if is_consultancy:
+                    return Response({'message': 'Consultant created successfully'}, status=status.HTTP_201_CREATED)
                # generated_otp=random.randint(100000,999999)
                # generated_otp_test = request.session.get('otp')
                # request.session['otp']=str(generated_otp)

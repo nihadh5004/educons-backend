@@ -5,6 +5,7 @@ urlpatterns = [
     path('consultant-courses/', ConsultantCourseListView.as_view(), name='consultant-course-list'),
     path('consultant-students/<int:consultant_id>/', ConsultantStudentList.as_view(), name='consultant-students'),
     path('edit-course/', EditCourse.as_view(), name='edit-course'),
+    path('get-consultant-dashboard/<int:consultant_id>/', FetchConsultantDetails.as_view(), name='edit-course'),
 
 
 ]

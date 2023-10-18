@@ -13,6 +13,7 @@ urlpatterns = [
     path('get-consultant-request/', ConsultantRequestList.as_view(), name='get-consultant-request'),
     path('approve-consultant-request/<int:request_id>/', ApproveConsultantRequest.as_view(), name='approve-consultant-request'),
     path('block-course/', CourseBlockView.as_view(), name='block-course'),
+    path('get-admin-dashboard/', FetchAdminDetails.as_view(), name='admin-dashboard'),
 
 
 

@@ -2,9 +2,15 @@ import json
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from datetime import datetime
+from .views import get_user_from_token,update_online_status
+
+online_users = {}
 
 class ChatConsumer(AsyncWebsocketConsumer):
+
     async def connect(self):
+        token = self.scope["query_string"].decode("utf-8")
+        user =   get_user_from_token(token)
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f"chat_{self.room_name}"
 
@@ -12,15 +18,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
+        
         print('room created',self.room_group_name)
         await self.accept()
+        await update_online_status(True, user)
 
     async def disconnect(self, close_code):
+        token = self.scope["query_string"].decode("utf-8")
+        user =   get_user_from_token(token)
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
         )
-        print('room dosconnected',self.room_group_name)
+        await update_online_status(False, user)
+       
+
+        print('room disconnected',self.room_group_name)
     
     async def receive(self, text_data):
         print('message received')
@@ -65,4 +78,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'receiver':receiver,
             'timestamp': timestamp 
         }))
+    
+    
+
+
     
