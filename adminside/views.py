@@ -471,3 +471,17 @@ class StudentsList(APIView):
         print('yes')
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TopCourses(APIView):
+    def get(self, request):
+        try:
+            courses = Course.objects.all()[:5]
+            serializer = CourseSerializer(courses, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": "An error occurred while fetching courses."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    

@@ -145,16 +145,15 @@ def activate(request,uidb64,token):
         return render(request, 'verification_failed.html')    
 
 class Signout(APIView):
-     # permission_classes = (IsAuthenticated, )
      def post(self, request):
           refresh_token = request.data.get('refresh_token')
           print(refresh_token)
           if refresh_token:
                try:
-                    print('no')
-                    token = RefreshToken(refresh_token)
-                    token.blacklist()
-                    print('no')
+                    # print('no')
+                    # token = RefreshToken(refresh_token)
+                    # token.blacklist()
+                    # print('no')
                     response = JsonResponse({"message": "Logged out successfully."})
                 
                     return response

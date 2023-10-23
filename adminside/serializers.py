@@ -54,7 +54,15 @@ class BlogSerializer(serializers.ModelSerializer):
         model = Blog
         fields = ('id', 'username', 'heading', 'image', 'truncated_content', 'created_date', 'is_active')
         
+class SavedBlogSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source='user.username') 
+    blog=BlogSerializer()
+    class Meta:
+        model = Blog
+        fields = ('id', 'username', 'blog')
         
+
+       
 class BlogDetailSerializer(serializers.ModelSerializer):
     username = serializers.ReadOnlyField(source='user.username') 
     class Meta:

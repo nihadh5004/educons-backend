@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from adminside.serializers import BlogSerializer, SavedBlogSerializer
+from adminside.models import SavedBlog
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenVerifyView
 from rest_framework.views import APIView
@@ -46,3 +48,17 @@ class FileUploadView(APIView):
             return Response({'message': 'File uploaded successfully'}, status=status.HTTP_200_OK)
         else:
             return Response({'message': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+class SavedBlogs(APIView):
+      def get(self, request, user_id):
+        # try:
+            user = CustomUser.objects.get(id=user_id)  
+            blogs = SavedBlog.objects.filter(user=user)
+            serializer = SavedBlogSerializer(blogs, many=True) 
+            return Response(serializer.data)
+        # except CustomUser.DoesNotExist:
+        #     return Response({"error": "User not found"}, status=404)
+        # except SavedBlogs.DoesNotExist:
+        #     return Response({"error": "No saved blogs found for this user"}, status=404)
+            

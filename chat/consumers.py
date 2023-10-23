@@ -80,6 +80,55 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
     
     
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
+        self.room_group_name = f"notification_{self.room_name}"
+
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+        
+        print('room created',self.room_group_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+       
+
+        print('room disconnected',self.room_group_name)
+    
+    async def receive(self,text_data):
+        
+        try:
+            text_data_json = json.loads(text_data)
+            username = text_data_json.get('text')
+            print('yyy')
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'notification.message',
+                    'notification_data':  f"Your request for {username} has approved",
+                }
+            )
+        except json.JSONDecodeError:
+            await self.send(text_data=json.dumps({'error': 'Invalid JSON format'}))
+
+
+    async def notification_message(self, event):
+        notification_data = event['notification_data']
+
+        await self.send(text_data=json.dumps({
+            'notification_data': notification_data,
+        }))
+    
+    
 
 
     
