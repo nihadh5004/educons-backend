@@ -14,6 +14,7 @@ from datetime import timedelta
 from pathlib import Path
 from .info import *
 import os
+from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -147,7 +148,7 @@ SITE_URL ='http://127.0.0.1:5173'
 
 
 
-STRIPE_SECRET_KEY = 'sk_test_51O0IwOSGKyiP0qJkBa9xgnT3lBAuVIrZaDMkDEEtfTdVB9enIfHrdmMu5CQ8un5HqaOeWmZqe5dY4hnaXM3DyyRA00thfnXlo0'
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
