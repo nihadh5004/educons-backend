@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import * 
+from .models.course import * 
+from .models.college import * 
+from .models.country import * 
+from .models.blog import * 
 # Register your models here.
 admin.site.register(Country)
 admin.site.register(College)

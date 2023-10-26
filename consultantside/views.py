@@ -5,10 +5,11 @@ from rest_framework import status
 from userside.models import UserRequest  
 from django.shortcuts import get_object_or_404
 from .serializers import *
+from authentication.custom_permission import IsConsultant
 from rest_framework.permissions import IsAuthenticated
 # Create your views here.
 class UserRequestsForConsultancy(APIView):
-    # permission_classes = [IsAuthenticated] 
+    permission_classes = [IsAuthenticated,IsConsultant] 
 
     def get(self, request, user_id):
         # Retrieve the UserRequest objects for the specific consultancy (course)
@@ -31,6 +32,8 @@ class ConsultantCourseListView(APIView):
         return Response({'courses': serializer.data}, status=status.HTTP_200_OK)
         
 class ConsultantStudentList(APIView):
+    permission_classes = [IsAuthenticated,IsConsultant] 
+
     def get(self, request, consultant_id):
         # Filter ConsultantRequest objects by consultant_id
         students = ConsultantRequest.objects.filter(consultant_id=consultant_id)
@@ -43,6 +46,7 @@ class ConsultantStudentList(APIView):
 
 
 class EditCourse(APIView):
+    
     def post(self, request):
             # Parse incoming data
             course_id = request.data.get('courseId')
@@ -87,7 +91,9 @@ class EditCourse(APIView):
         
         
 class FetchConsultantDetails(APIView):
-     def get(self, request, consultant_id):
+    permission_classes = [IsAuthenticated,IsConsultant] 
+
+    def get(self, request, consultant_id):
         try:
             # Get the consultant object or return a 404 if not found
             consultant = get_object_or_404(CustomUser, pk=consultant_id)

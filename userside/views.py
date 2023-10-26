@@ -3,13 +3,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.mail import send_mail , EmailMessage
 from backend import settings
-
+from rest_framework.permissions import IsAuthenticated
+from authentication.custom_permission import IsAdmin
 from authentication.models import *
-from adminside.models import *
+from adminside.models.course import *
 from .serializers import *
 from adminside.serializers import *
 from django.contrib.auth.models import User  # Import the User model from Django
 class UserList(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
     def get(self, request):
         # Query all users in the database
         users = CustomUser.objects.all()
@@ -21,6 +24,8 @@ class UserList(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class BlockUserView(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
     def put(self, request, user_id):
         try:
             # Get the user by user_id
@@ -46,6 +51,8 @@ class BlockUserView(APIView):
         
         
 class UnblockUserView(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
     def put(self, request, user_id):
         try:
             # Retrieve the user by ID
@@ -76,6 +83,8 @@ class UnblockUserView(APIView):
         
         
 class CountryListView(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
     def get(self, request):
         countries = Country.objects.all()
         serializer = CountryInfoSerializer(countries, many=True)
@@ -83,6 +92,8 @@ class CountryListView(APIView):
 
 
 class CountryCreateView(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
     def post(self, request, format=None):
         # Get all the data from the request
         name = request.data.get('name')
@@ -207,6 +218,8 @@ class SubmitConsultantRequest(APIView):
 from consultantside.serializers import ConsultantRequestSerializer  
         
 class ConsultantRequestList(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
     def get(self,request):
         requests=ConsultantRequest.objects.all()
         serializer = ConsultantRequestSerializer(requests, many=True)
@@ -265,8 +278,10 @@ class CourseBlockView(APIView):
 
         
 class FetchAdminDetails(APIView):
+    permission_classes = [IsAuthenticated,IsAdmin]
+
     def get(self,request):
-        # try:
+        try:
             students=CustomUser.objects.filter(is_student=True).count()
             courses=Course.objects.all().count()
             users=CustomUser.objects.filter(is_consultancy=False,is_superuser=False).count()
@@ -285,10 +300,10 @@ class FetchAdminDetails(APIView):
                 # Return the data in the response
             return Response(data, status=status.HTTP_200_OK)
 
-        # except CustomUser.DoesNotExist:
-        #     # Handle the case where the consultant is not found
-        #     return Response({"error": "Consultant not found"}, status=status.HTTP_404_NOT_FOUND)
+        except CustomUser.DoesNotExist:
+            # Handle the case where the consultant is not found
+            return Response({"error": "Consultant not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # except Exception as e:
-        #     # Handle other exceptions
-        #     return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            # Handle other exceptions
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

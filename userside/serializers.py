@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from authentication.models import CustomUser
-from adminside.models import *
+from adminside.models.country import *
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser

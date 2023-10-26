@@ -30,8 +30,67 @@ import random
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
     
-    
-    
+class ForgetPasswordEmailView(APIView):
+     def post(self,request):
+          try:
+               username = request.data.get('username')   
+               myuser=CustomUser.objects.get(username=username)
+               print(myuser)
+               
+               current_site = get_current_site(request)
+               email_subject = 'confirm Your email @ EduCons'
+               message2 = render_to_string('forgot_password_mail.html',{
+                    'name': myuser.username ,   
+                    'domain': current_site.domain ,
+                    'uid': urlsafe_base64_encode(force_bytes(myuser.pk)),
+                    'token': generate_token.make_token(myuser),
+               })
+               email = EmailMessage(
+                    email_subject,message2,
+                    settings.EMAIL_HOST_USER,
+                    [myuser.email] 
+               )
+               email.fail_silently = True
+               email.send()
+
+               return Response({'message': 'email sent successfully'}, status=status.HTTP_200_OK)
+          except Exception as e:
+               # Handle exceptions here and return an appropriate error response
+               return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+               
+               
+def forgot_password_mail_view(request,uidb64,token):
+     try:
+        uid=force_str(urlsafe_base64_decode(uidb64))
+        myuser=CustomUser.objects.get(pk=uid)
+     except(TypeError,ValueError,OverflowError, User.DoesNotExist):
+        myuser=None
+    # checking the user and token doesnt has a conflict  
+     if myuser is not None and generate_token.check_token(myuser,token):
+        
+        
+          session = settings.SITE_URL + '/reset-password/?uidb64=' + uidb64
+          #    return render(request,'verification_success.html')
+          return HttpResponseRedirect(session)        
+     
+class ResetPassword(APIView):
+     def post(self,request):
+          password = request.data.get('password')
+          uidb64 = request.data.get('uidb64')
+          try:
+               uid=force_str(urlsafe_base64_decode(uidb64))
+               myuser=CustomUser.objects.get(pk=uid)
+          except(TypeError,ValueError,OverflowError, User.DoesNotExist):
+               myuser=None
+          if myuser is not None:
+            # Set the new password for the user
+            myuser.set_password(password)
+            myuser.save()
+
+            return JsonResponse({'message': 'Password reset successfully'}, status=200)
+          else:
+            return JsonResponse({'error': 'Invalid or expired reset link'}, status=400)
+               
 
 class Signup(APIView):
      def post (self,request):
@@ -55,17 +114,8 @@ class Signup(APIView):
                myuser.save()
                if is_consultancy:
                     return Response({'message': 'Consultant created successfully'}, status=status.HTTP_201_CREATED)
-               # generated_otp=random.randint(100000,999999)
-               # generated_otp_test = request.session.get('otp')
-               # request.session['otp']=str(generated_otp)
-               # print('hello')
-               # sending OTP through mail
-               # subject = 'EduCons Confirmation OTP'
-               # message = f'Hello {myuser.username},\nWe are happy to serve you\n \nPlease Verify your account by OTP: {generated_otp}'
-               # from_email=settings.EMAIL_HOST_USER
-               # to_list=[myuser.email]
-               
-               # send_mail(subject,message,from_email,to_list,fail_silently=True)
+              
+              
                #email confirmation for the user
                current_site = get_current_site(request)
                email_subject = 'confirm Your email @ EduCons'
@@ -125,7 +175,7 @@ def activate(request,uidb64,token):
         myuser=CustomUser.objects.get(pk=uid)
      except(TypeError,ValueError,OverflowError, User.DoesNotExist):
         myuser=None
-    # checking the user and token doesnt has a conflict  
+      # checking the user and token doesnt has a conflict  
      if myuser is not None and generate_token.check_token(myuser,token):
         
         myuser.is_active=True
@@ -150,10 +200,10 @@ class Signout(APIView):
           print(refresh_token)
           if refresh_token:
                try:
-                    # print('no')
-                    # token = RefreshToken(refresh_token)
-                    # token.blacklist()
-                    # print('no')
+                    print('no')
+                    token = RefreshToken(refresh_token)
+                    token.blacklist()
+                    print('no')
                     response = JsonResponse({"message": "Logged out successfully."})
                 
                     return response

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from adminside.serializers import BlogSerializer, SavedBlogSerializer
-from adminside.models import SavedBlog
+from adminside.models.blog import SavedBlog
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenVerifyView
 from rest_framework.views import APIView
@@ -13,20 +13,18 @@ from authentication.serializers import CustomUserSerializer
 
 
 class Profile(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
             username = request.query_params.get('username')
-            print(username )
             user=CustomUser.objects.get(username=username)
-            print(user)
+            
             # Check if the user exists
             if not user:
                 return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
             serializer = CustomUserSerializer(user)
-            print('yes')
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -51,14 +49,16 @@ class FileUploadView(APIView):
         
         
 class SavedBlogs(APIView):
-      def get(self, request, user_id):
-        # try:
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
             user = CustomUser.objects.get(id=user_id)  
             blogs = SavedBlog.objects.filter(user=user)
             serializer = SavedBlogSerializer(blogs, many=True) 
             return Response(serializer.data)
-        # except CustomUser.DoesNotExist:
-        #     return Response({"error": "User not found"}, status=404)
-        # except SavedBlogs.DoesNotExist:
-        #     return Response({"error": "No saved blogs found for this user"}, status=404)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+        except SavedBlogs.DoesNotExist:
+            return Response({"error": "No saved blogs found for this user"}, status=404)
             

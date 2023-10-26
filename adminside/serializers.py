@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import *
+from .models.country import *
+from .models.course import *
+from .models.college import *
+from .models.blog import *
 from authentication.models import CustomUser
 
 

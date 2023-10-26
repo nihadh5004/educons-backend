@@ -1,6 +1,6 @@
 from django.db import models
 from authentication.models import CustomUser
-from adminside.models import Course
+from adminside.models.course import Course
 # Create your models here.
 class UserRequest(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
